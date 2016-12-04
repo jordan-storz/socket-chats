@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Sockets!</title>
+    <style>
+      body {
+        height: 100vh;
+      }
+    </style>
+  </head>
+  <body>
+    <form action="/">
+      <label for="roomName">Enter room name</label>
+      <input type="text" name="roomName">
+      <button type="submit">Submit</button>
+    </form>
+    <form action="/">
+      <label for="roomEmit">Enter message</label>
+      <input type="text" name="roomEmit">
+      <button type="submit">Submit</button>
+    </form>
+    <h1>Current Room: <span id="room-name"></span></h1>
+    <div id="chat-messages">
+
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.6.0/socket.io.js"></script>
+    <script>
+    var socket = io.connect('/');
+    var currentRoom = '';
+
+    document.forms[0].addEventListener('submit', function(event) {
+      event.preventDefault();
+      let roomName = document.querySelector('input[name="roomName"]').value;
+      socket.emit('roomConnect', {roomName});
+      currentRoom = roomName;
+      document.querySelector('#room-name').innerText = currentRoom;
+    });
+
+    document.forms[1].addEventListener('submit', function(event) {
+      event.preventDefault();
+      let message = document.querySelector('input[name="roomEmit"]').value;
+      let roomName = currentRoom;
+      socket.emit('roomMessage', {message, roomName});
+    });
+
+    socket.on('message', function(data) {
+      console.log(data.message);
+      appendMessage(data.message);
+    });
+
+    function appendMessage(message) {
+      let chatMessages = document.querySelector('#chat-messages');
+      let messageDiv = document.createElement('p');
+      messageDiv.innerText = message;
+      chatMessages.appendChild(messageDiv);
+    }
+
+    </script>
+  </body>
+</html>
